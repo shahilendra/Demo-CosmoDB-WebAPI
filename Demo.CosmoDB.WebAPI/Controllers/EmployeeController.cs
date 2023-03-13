@@ -20,12 +20,12 @@ namespace Demo.CosmoDB.WebAPI.Controllers
 
         // GET: api/<EmployeeController>
         [HttpGet]
-        public async Task<List<Employees>> Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
                 _logger.LogInformation($"{nameof(EmployeeController)}.{nameof(Get)} started!");
-                return await _employeeService.GetAsync();
+                return Ok(await _employeeService.GetAsync());
             }
             catch (Exception ex)
             {
@@ -37,12 +37,12 @@ namespace Demo.CosmoDB.WebAPI.Controllers
 
         // GET api/<EmployeeController>/5
         [HttpGet("{id}")]
-        public async Task<Employees> Get(string id)
+        public async Task<IActionResult> Get(string id)
         {
             try
             {
                 _logger.LogInformation($"{nameof(EmployeeController)}.{nameof(Get)}/{id} started!");
-                return await _employeeService.GetAsync(id);
+                return Ok(await _employeeService.GetAsync(id));
             }
             catch (Exception ex)
             {
@@ -53,12 +53,22 @@ namespace Demo.CosmoDB.WebAPI.Controllers
 
         // POST api/<EmployeeController>
         [HttpPost]
-        public async Task Post([FromBody] Employees employee)
+        public async Task<IActionResult> Post([FromBody] Employees employee)
         {
             try
             {
                 _logger.LogInformation($"{nameof(EmployeeController)}.{nameof(Post)} started!");
+                if (employee.id == null)
+                {
+                    return BadRequest("Employee was empty!");
+                }
+                var emp = _employeeService.GetAsync(employee?.id?.ToString());
+                if(emp != null)
+                {
+                    return BadRequest("Employee alredy exist!");
+                }
                 await _employeeService.AddAsync(employee);
+                return Ok(new { message = "Employee Added successfully!" });
             }
             catch (Exception ex)
             {
@@ -69,12 +79,22 @@ namespace Demo.CosmoDB.WebAPI.Controllers
 
         // PUT api/<EmployeeController>/5
         [HttpPut("{id}")]
-        public async Task Put(string id, [FromBody] Employees employee)
+        public async Task<IActionResult> Put(string id, [FromBody] Employees employee)
         {
             try
             {
                 _logger.LogInformation($"{nameof(EmployeeController)}.{nameof(Put)} started!");
+                if (id == null)
+                {
+                    return BadRequest("Employee was empty!");
+                }
+                var emp = _employeeService.GetAsync(id);
+                if (emp == null)
+                {
+                    return BadRequest("Employee is not exist!");
+                }
                 await _employeeService.UpdateAsync(id, employee);
+                return Ok(new { message = "Employee updated successfully!" });
             }
             catch (Exception ex)
             {
@@ -85,12 +105,18 @@ namespace Demo.CosmoDB.WebAPI.Controllers
 
         // DELETE api/<EmployeeController>/5
         [HttpDelete("{id}")]
-        public async Task Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
                 _logger.LogInformation($"{nameof(EmployeeController)}.{nameof(Delete)} started!");
+                var emp = _employeeService.GetAsync(id);
+                if (emp == null)
+                {
+                    return BadRequest("Employee is not exist!");
+                }
                 await _employeeService.DeleteAsync(id);
+                return Ok(new { message = "Employee deleted successfully!" });
             }
             catch (Exception ex)
             {
