@@ -6,6 +6,11 @@
         string AppVersion { get; }
         string EndpointUri { get; }
         string PrimaryKey { get; }
-        string DatabaseName { get;}
+        string DatabaseName { get; }
+        int CacheExpiration { get; }
+        string RedisConnection { get; }
+        string Issuer { get; }
+        string Audience { get; }
+        string Key { get; }
     }
 }
